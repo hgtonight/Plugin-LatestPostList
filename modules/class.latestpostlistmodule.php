@@ -51,7 +51,7 @@ class LatestPostListModule extends Gdn_Module {
 				
 				// If there is a comment, let's use that, otherwise use the original poster
 				if ($Post->LastName) {
-					$LastPoster = Anchor(Gdn_Format::Text($Post->LastName), 'profile/'.$Post->UpdateUserID.'/'.Gdn_Format::Url($Post->LastName), 'PostAuthor' );
+					$LastPoster = Anchor(Gdn_Format::Text($Post->LastName), 'profile/'.$Post->LastUserID.'/'.Gdn_Format::Url($Post->LastName), 'PostAuthor' );
 				}
 				else {
 					$LastPoster = Anchor(Gdn_Format::Text($Post->FirstName), 'profile/'.$Post->InsertUserID.'/'.Gdn_Format::Url($Post->FirstName), 'PostAuthor' );
