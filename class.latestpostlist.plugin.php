@@ -123,7 +123,7 @@ class LatestPostList extends Gdn_Plugin {
   // Treat our mini-controller as a settings page (plugin/latestpostlist)
   public function Controller_Index($Sender) {
     // Admins only
-    $Sender->Permission('Vanilla.Settings.Manage');
+    $Sender->Permission('Garden.Settings.Manage');
 
     // Set data used by the view
     $Sender->SetData('PluginDescription', $this->GetPluginKey('Description'));
