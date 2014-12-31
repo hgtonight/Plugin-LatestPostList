@@ -3,7 +3,7 @@ $(function(){
 	// Set variables from configs
 	var Effects = gdn.definition('LatestPostListEffects');
 	var Frequency = gdn.definition('LatestPostListFrequency');
-   	var LastDate = gdn.definition('LatestPostListLastDate');
+  var LastDate = gdn.definition('LatestPostListLastDate');
 
 	function GetLatestPosts() {
 		var url = gdn.url('/plugin/latestpostlist/getnewlist');
