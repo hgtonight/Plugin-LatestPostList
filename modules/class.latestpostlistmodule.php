@@ -47,7 +47,7 @@ class LatestPostListModule extends Gdn_Module {
 		$Posts = '';
 		if($this->_LatestPosts->NumRows() >= 1) {
 			foreach($this->_LatestPosts->Result() as $Post) {
-				$PostTitle = Anchor(Gdn_Format::Text($Post->Name), 'discussion/'.$Post->DiscussionID.'/'.Gdn_Format::Url($Post->Name), 'PostTitle'); 
+				$PostTitle = Anchor(Gdn_Format::Text($Post->Name), 'discussion/'.$Post->DiscussionID.'/'.Gdn_Format::Url($Post->Name).'#latest', 'PostTitle'); 
 				
 				// If there is a comment, let's use that, otherwise use the original poster
 				if ($Post->LastName) {
