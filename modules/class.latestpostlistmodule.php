@@ -70,7 +70,7 @@ class LatestPostListModule extends Gdn_Module {
 		if($this->_LatestPosts->NumRows() >= 1) {
 			ob_start();
 			?>
-			<div id="LatestPostList" class="Box"><?php
+			<div class="Box LatestPostListBox"><?php
 				if($this->_Link) {
 					echo Wrap(Anchor(T('Latest Posts'), $this->_Link), 'h4');
 				}
