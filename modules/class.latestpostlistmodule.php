@@ -17,7 +17,8 @@ class LatestPostListModule extends Gdn_Module {
 	protected $_LatestPosts;
 	protected $_Link = 'discussions';
 
-	public function __construct($Sender = '') {
+	public function __construct($Sender = '', $Limit = 5, $Link = 'discussions') {
+        $this->SetData($Limit, $Link);
 		parent::__construct($Sender);
 	}
 
