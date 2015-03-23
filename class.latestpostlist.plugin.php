@@ -16,8 +16,8 @@
 $PluginInfo['LatestPostList'] = array(
     'Name' => 'Latest Post List',
     'Description' => 'Lists the latest posts in the panel. Respects permissions, has an AJAX refresh, and is configurable.',
-    'Version' => '1.5.4',
-    'RequiredApplications' => array('Vanilla' => '2.0.10'),
+    'Version' => '1.5.5',
+    'RequiredApplications' => array('Vanilla' => '2.1.9'),
     'RequiredTheme' => FALSE,
     'RequiredPlugins' => FALSE,
     'HasLocale' => FALSE,
@@ -26,7 +26,7 @@ $PluginInfo['LatestPostList'] = array(
     'Author' => "Zachary Doll",
     'AuthorEmail' => 'hgtonight@daklutz.com',
     'AuthorUrl' => 'http://www.daklutz.com',
-    'License' => 'GPLv3'
+    'License' => 'GPLv2'
 );
 
 class LatestPostList extends Gdn_Plugin {
