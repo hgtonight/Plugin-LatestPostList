@@ -53,7 +53,7 @@
                     wrap('Sample item 2', 'li', array('class' => 'Info')) .
                     wrap('Sample item 3', 'li', array('class' => 'Warning')) .
                     wrap('Sample item 4', 'li', array('class' => 'Info')) .
-                    wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('class' => 'PanelInfo', 'id' => 'LPLPreview')) .
+                    wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('class' => 'PanelInfo', 'id' => 'LPLUl')) .
             wrap(
                     wrap('Sample item 1', 'li', array('class' => 'Warning')) .
                     wrap('Sample item 2', 'li', array('class' => 'Info')) .

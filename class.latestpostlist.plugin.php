@@ -113,7 +113,8 @@ class LatestPostList extends Gdn_Plugin {
         }
 
         // Add the javascript needed for a live preview
-        $sender->addJsFile($this->getResource('js/preview.js', false, false));
+        $sender->addJsFile($this->GetResource('js/latestpostlist.js', false, false));
+        $sender->addDefinition('LatestPostListSettings', true);
         // Render the settings view
         $sender->render($this->getView('settings.php'));
     }
