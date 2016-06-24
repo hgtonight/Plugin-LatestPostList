@@ -1,5 +1,6 @@
-<?php if (!defined('APPLICATION')) exit();
-/* 	Copyright 2013-2015 Zachary Doll
+<?php
+/**
+ *  Copyright 2013-2016 Zachary Doll
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -13,84 +14,134 @@
  *
  * 	You should have received a copy of the GNU General Public License
  * 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @license GPLv2
+ * @copyright 2013-2016 Zachary Doll
  */
 
+/**
+ * Renders a list of discussions to be displayed in the panel.
+ */
 class LatestPostListModule extends Gdn_Module {
 
-    protected $_LatestPosts;
-    protected $_Link = 'discussions';
-
-    public function __construct($Sender = '') {
-        $this->SetData(
-                C('Plugins.LatestPostList.Count', 5),
-                C('Plugins.LatestPostList.Link', 'discussions') );
-        parent::__construct($Sender);
+    protected $latestPosts;
+    protected $link = 'discussions';
+    
+    /**
+     * Load data using settings from config.
+     * 
+     * @param mixed $sender The sending object.
+     */
+    public function __construct($sender = '') {
+        $this->setData(
+            c('LatestPostList.Count', 5),
+            c('LatestPostList.Link', 'discussions')
+        );
+        parent::__construct($sender);
     }
 
-    // Using the discussion model makes my life easy
-    public function SetData($Limit = 5, $Link = 'discussions') {
+    /**
+     * Load the discussion data.
+     * 
+     * @param int $limit How many discussions to load.
+     * @param string $link Path for the header link.
+     */
+    public function setData($limit = 5, $link = 'discussions') {
         $DiscussionModel = new DiscussionModel();
-        $this->_LatestPosts = $DiscussionModel->Get(0, $Limit, 'all');
-        $this->_Link = $Link;
+        $this->latestPosts = $DiscussionModel->get(0, $limit, 'all');
+        $this->link = $link;
     }
 
-    // Required for modules. Tells the controller where to render the module.
-    public function AssetTarget() {
+    /**
+     * Required for Gdn_IModule.
+     * 
+     * @return string The asset we want to render in.
+     */
+    public function assetTarget() {
         return 'Panel';
     }
 
-    // Convenience function used to mark the lists date
-    public function GetDate() {
-        if ($this->_LatestPosts->NumRows() < 1) {
+    /**
+     * Convenience function used to mark a lists date.
+     * 
+     * @return int Timestamp of the last comment.
+     */
+    public function getDate() {
+        if ($this->latestPosts->numRows() < 1) {
             return 0;
         }
-        $Posts = $this->_LatestPosts->Result();
-        return $Posts[0]->DateLastComment;
+        $posts = $this->latestPosts->result();
+        return $posts[0]->DateLastComment;
     }
 
-    // Returns an html string ready for rendering
-    public function PostList() {
-        $Posts = '';
-        if ($this->_LatestPosts->NumRows() >= 1) {
-            foreach ($this->_LatestPosts->Result() as $Post) {
-                $PostTitle = Anchor(Gdn_Format::Text($Post->Name), 'discussion/' . $Post->DiscussionID . '/' . Gdn_Format::Url($Post->Name) . '#latest', 'PostTitle');
+    /**
+     * Construct a list from the gathered data.
+     * 
+     * @return string An HTML list.
+     */
+    public function postList() {
+        $posts = '';
+        if ($this->latestPosts->numRows() >= 1) {
+            foreach ($this->latestPosts->result() as $post) {
+                $postTitle = anchor(
+                    Gdn_Format::text($post->Name),
+                    'discussion/' . $post->DiscussionID . '/' . Gdn_Format::url($post->Name) . '#latest',
+                    'PostTitle'
+                );
 
                 // If there is a comment, let's use that, otherwise use the original poster
-                if ($Post->LastName) {
-                    $LastPoster = Anchor(Gdn_Format::Text($Post->LastName), 'profile/' . $Post->LastUserID . '/' . Gdn_Format::Url($Post->LastName), 'PostAuthor');
+                if ($post->LastName) {
+                    $lastPoster = anchor(
+                        Gdn_Format::text($post->LastName),
+                        'profile/' . $post->LastUserID . '/' . Gdn_Format::url($post->LastName),
+                        'PostAuthor'
+                    );
                 } else {
-                    $LastPoster = Anchor(Gdn_Format::Text($Post->FirstName), 'profile/' . $Post->InsertUserID . '/' . Gdn_Format::Url($Post->FirstName), 'PostAuthor');
+                    $lastPoster = anchor(
+                        Gdn_Format::text($post->FirstName),
+                        'profile/' . $post->InsertUserID . '/' . Gdn_Format::url($post->FirstName),
+                        'PostAuthor'
+                    );
                 }
 
-                $PostData = Wrap(T('on ') . Gdn_Format::Date($Post->DateLastComment), 'span', array('class' => 'PostDate'));
-                $Posts .= Wrap($PostTitle . Wrap($LastPoster . ' ' . $PostData, 'div', array('class' => 'Condensed')), 'li', array('class' => ($Post->CountUnreadComments > 0) ? 'New' : ''));
+                $postData = wrap(t('on ') . Gdn_Format::date($post->DateLastComment), 'span', array('class' => 'PostDate'));
+                $posts .= wrap(
+                    $postTitle . wrap(
+                        $lastPoster . ' ' . $postData,
+                        'div',
+                        array('class' => 'Condensed')
+                    ),
+                    'li',
+                    array('class' => ($post->CountUnreadComments > 0) ? 'New' : '')
+                );
             }
         }
-        return $Posts;
+        return $posts;
     }
 
-    // Required for module to render something
-    public function ToString() {
-        $String = '';
-        if ($this->_LatestPosts->NumRows() >= 1) {
-            ob_start();
-            ?>
-            <div id="LatestPostList" class="Box"><?php
-                if ($this->_Link) {
-                    echo Wrap(Anchor(T('Latest Posts'), $this->_Link), 'h4');
-                } else {
-                    echo Wrap(T('Latest Posts'), 'h4');
-                }
-
-                echo Wrap($this->PostList(), 'ul', array('id' => 'LPLUl', 'class' => 'PanelInfo'));
-                ?>
-            </div>
-            <?php
-            $String = ob_get_contents();
-            @ob_end_clean();
-            return $String;
+    /**
+     * Render a string for the target asset.
+     * 
+     * @return string The complete HTML module.
+     */
+    public function toString() {
+        $string = '';
+        if ($this->latestPosts->NumRows() >= 1) {
+            $linkString = wrap(t('Latest Posts'), 'h4');
+            if ($this->link) {
+                $linkString = wrap(anchor(t('Latest Posts'), $this->link), 'h4');
+            }
+            
+            $string .= wrap(
+                $linkString . wrap(
+                    $this->PostList(),
+                    'ul',
+                    array('id' => 'LPLUl', 'class' => 'PanelInfo')
+                ),
+                'div',
+                array('class' => 'Box', 'id' => 'LatestPostList')
+            );
         }
-        return $String;
+        return $string;
     }
-
 }

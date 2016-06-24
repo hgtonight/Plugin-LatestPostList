@@ -1,5 +1,5 @@
 <?php if (!defined('APPLICATION')) exit();
-/* 	Copyright 2012-2015 Zachary Doll
+/* 	Copyright 2012-2016 Zachary Doll
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -16,59 +16,59 @@
  */
 ?>
 <div class="Header"><?php
-    echo Wrap(T($this->Data['Title']), 'h3');
-    echo Wrap(T($this->Data['PluginDescription']), 'div', array('class' => 'Info'));
+    echo wrap(t($this->Data['Title']), 'h3');
+    echo wrap(t($this->Data['PluginDescription']), 'div', array('class' => 'Info'));
     ?>
 </div>
 <div class="Content"><?php
-    echo $this->Form->Open();
-    echo $this->Form->Errors();
+    echo $this->Form->open();
+    echo $this->Form->errors();
 
-    echo Wrap(T('Appearance Settings'), 'h3');
-    echo Wrap(
-            Wrap(
-                    $this->Form->Label(T('List Length'), 'Plugins.LatestPostList.Count') .
-                    Wrap(T('The maximum number of discussions that will be shown in the panel'), 'div', array('class' => 'Info')) .
-                    $this->Form->Textbox('Plugins.LatestPostList.Count'), 'li') .
-            Wrap(
-                    $this->Form->Label(T('Pages'), 'Plugins.LatestPostList.Pages') .
-                    Wrap(T('The pages the module will be shown on'), 'div', array('class' => 'Info')) .
-                    $this->Form->DropDown('Plugins.LatestPostList.Pages', array(
+    echo wrap(t('Appearance Settings'), 'h3');
+    echo wrap(
+            wrap(
+                    $this->Form->label(t('List Length'), 'LatestPostList.Count') .
+                    wrap(t('The maximum number of discussions that will be shown in the panel'), 'div', array('class' => 'Info')) .
+                    $this->Form->textbox('LatestPostList.Count'), 'li') .
+            wrap(
+                    $this->Form->label(t('Pages'), 'LatestPostList.Pages') .
+                    wrap(t('The pages the module will be shown on'), 'div', array('class' => 'Info')) .
+                    $this->Form->dropDown('LatestPostList.Pages', array(
                         'both' => 'Discussions & Announcements',
                         'announcements' => 'Just Announcements',
                         'discussions' => 'Just Discussions',
                         'all' => 'Every frontend page'
                     )), 'li') .
-            Wrap(
-                    $this->Form->Label(T('Link'), 'Plugins.LatestPostList.Link') .
-                    Wrap(T('The url of the page the module header points to; leave blank if you don\'t want a link'), 'div', array('class' => 'Info')) .
-                    Wrap(Url('/', TRUE), 'strong') .
-                    $this->Form->Textbox('Plugins.LatestPostList.Link'), 'li'), 'ul');
+            wrap(
+                    $this->Form->label(t('Link'), 'LatestPostList.Link') .
+                    wrap(t('The url of the page the module header points to; leave blank if you don\'t want a link'), 'div', array('class' => 'Info')) .
+                    wrap(url('/', TRUE), 'strong') .
+                    $this->Form->textbox('LatestPostList.Link'), 'li'), 'ul');
 
-    echo Wrap(T('Refresh Settings'), 'h3');
-    echo Wrap(
-            Wrap(T('Animation Preview'), 'h4') .
-            Wrap(
-                    Wrap('Sample item 1', 'li', array('class' => 'Warning')) .
-                    Wrap('Sample item 2', 'li', array('class' => 'Info')) .
-                    Wrap('Sample item 3', 'li', array('class' => 'Warning')) .
-                    Wrap('Sample item 4', 'li', array('class' => 'Info')) .
-                    Wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('class' => 'PanelInfo', 'id' => 'LPLPreview')) .
-            Wrap(
-                    Wrap('Sample item 1', 'li', array('class' => 'Warning')) .
-                    Wrap('Sample item 2', 'li', array('class' => 'Info')) .
-                    Wrap('Sample item 3', 'li', array('class' => 'Warning')) .
-                    Wrap('Sample item 4', 'li', array('class' => 'Info')) .
-                    Wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('style' => 'display:none', 'id' => 'LPLNewItems')), 'div', array('class' => 'Aside Box'));
-    echo Wrap(
-            Wrap(
-                    $this->Form->Label(T('Frequency'), 'Plugins.LatestPostList.Frequency') .
-                    Wrap(T('The number of seconds to wait between checking for updates. Enter 0 to disable this feature.'), 'div', array('class' => 'Info')) .
-                    $this->Form->Textbox('Plugins.LatestPostList.Frequency'), 'li') .
-            Wrap(
-                    $this->Form->Label(T('Animation'), 'Plugins.LatestPostList.Effects') .
-                    Wrap(T('The effect used to update the list. Select "None" to update with no animation.'), 'div', array('class' => 'Info')) .
-                    $this->Form->DropDown('Plugins.LatestPostList.Effects', array(
+    echo wrap(t('Refresh Settings'), 'h3');
+    echo wrap(
+            wrap(t('Animation Preview'), 'h4') .
+            wrap(
+                    wrap('Sample item 1', 'li', array('class' => 'Warning')) .
+                    wrap('Sample item 2', 'li', array('class' => 'Info')) .
+                    wrap('Sample item 3', 'li', array('class' => 'Warning')) .
+                    wrap('Sample item 4', 'li', array('class' => 'Info')) .
+                    wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('class' => 'PanelInfo', 'id' => 'LPLPreview')) .
+            wrap(
+                    wrap('Sample item 1', 'li', array('class' => 'Warning')) .
+                    wrap('Sample item 2', 'li', array('class' => 'Info')) .
+                    wrap('Sample item 3', 'li', array('class' => 'Warning')) .
+                    wrap('Sample item 4', 'li', array('class' => 'Info')) .
+                    wrap('Sample item 5', 'li', array('class' => 'Warning')), 'ul', array('style' => 'display:none', 'id' => 'LPLNewItems')), 'div', array('class' => 'Aside Box'));
+    echo wrap(
+            wrap(
+                    $this->Form->label(t('Frequency'), 'LatestPostList.Frequency') .
+                    wrap(t('The number of seconds to wait between checking for updates. Enter 0 to disable this feature.'), 'div', array('class' => 'Info')) .
+                    $this->Form->textbox('LatestPostList.Frequency'), 'li') .
+            wrap(
+                    $this->Form->label(t('Animation'), 'LatestPostList.Effects') .
+                    wrap(t('The effect used to update the list. Select "None" to update with no animation.'), 'div', array('class' => 'Info')) .
+                    $this->Form->dropDown('LatestPostList.Effects', array(
                         'none' => 'None',
                         '1' => 'Rolling Hide',
                         '2' => 'Full Fade',
@@ -77,12 +77,12 @@
                         '5' => 'Rolling Width Fade'
                     )), 'li'), 'ul');
 
-    echo $this->Form->Close('Save');
+    echo $this->Form->close('Save');
     ?>
 </div>
 <div class="Footer">
     <?php
-    echo Wrap(T('Feedback'), 'h3');
+    echo wrap(t('Feedback'), 'h3');
     ?>
     <div class="Aside Box">
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="text-align: center; margin-top: 20px; margin-bottom: 10px;">
@@ -93,7 +93,7 @@
         </form>
     </div>
     <?php
-    echo Wrap('Find this plugin helpful? Want to support a freelance developer?<br/>Click the donate button to buy me a beer. :D', 'div', array('class' => 'Info'));
-    echo Wrap('Confused by something? <strong><a href="http://vanillaforums.org/post/discussion?AddonID=923">Ask a question</a></strong> about Latest Post List on the official <a href="http://vanillaforums.org/discussions" target="_blank">Vanilla forums</a>.', 'div', array('class' => 'Info'));
+    echo wrap('Find this plugin helpful? Want to support a freelance developer?<br/>Click the donate button to buy me a beer. :D', 'div', array('class' => 'Info'));
+    echo wrap('Confused by something? <strong><a href="http://vanillaforums.org/post/discussion?AddonID=923">Ask a question</a></strong> about Latest Post List on the official <a href="http://vanillaforums.org/discussions" target="_blank">Vanilla forums</a>.', 'div', array('class' => 'Info'));
     ?>
 </div>
