@@ -1,5 +1,6 @@
-<?php if (!defined('APPLICATION')) exit();
-/* 	Copyright 2013-2015 Zachary Doll
+<?php
+/**
+ *  Copyright 2013-2016 Zachary Doll
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -13,15 +14,19 @@
  *
  * 	You should have received a copy of the GNU General Public License
  * 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @license GPLv2
+ * @copyright 2013-2016 Zachary Doll
  */
+
 $PluginInfo['LatestPostList'] = array(
     'Name' => 'Latest Post List',
     'Description' => 'Lists the latest posts in the panel. Respects permissions, has an AJAX refresh, and is configurable.',
-    'Version' => '1.5.5',
-    'RequiredApplications' => array('Vanilla' => '2.1.9'),
-    'RequiredTheme' => FALSE,
-    'RequiredPlugins' => FALSE,
-    'HasLocale' => FALSE,
+    'Version' => '1.6',
+    'RequiredApplications' => array('Vanilla' => '2.2.1'),
+    'RequiredTheme' => false,
+    'RequiredPlugins' => false,
+    'HasLocale' => false,
     'SettingsUrl' => '/plugin/latestpostlist',
     'SettingsPermission' => 'Garden.Settings.Manage',
     'Author' => "Zachary Doll",
@@ -30,141 +35,189 @@ $PluginInfo['LatestPostList'] = array(
     'License' => 'GPLv2'
 );
 
+/**
+ * Creates a module showing the latest posts in the panel.
+ */
 class LatestPostList extends Gdn_Plugin {
 
-    // Creates a method called "LatestPostList" on the PluginController that acts like a controller
-    public function PluginController_LatestPostList_Create($Sender) {
-        $Sender->Title('Latest Post List Plugin');
-        $Sender->AddSideMenu('plugin/latestpostlist');
-
-        // get sub-pages forms ready
-        $Sender->Form = new Gdn_Form();
-        $this->Dispatch($Sender, $Sender->RequestArgs);
-    }
-    
-    private function DisallowedPage($Sender) {
-        $Result = FALSE;
-        // Get the config and controller name for comparison
-        $Pages = C('Plugins.LatestPostList.Pages', 'both');
-        $Controller = $Sender->ControllerName;
-
-        // Enumerate what preference relates to which controller
-        switch ($Pages) {
-            case 'announcements':
-                $ShowOnController = array('profilecontroller', 'activitycontroller');
-                break;
-            case 'discussions':
-                $ShowOnController = array('discussioncontroller', 'discussionscontroller', 'categoriescontroller', 'draftscontroller');
-                break;
-            case 'both':
-            default:
-                $ShowOnController = array('discussioncontroller', 'categoriescontroller', 'discussionscontroller', 'draftscontroller', 'profilecontroller', 'activitycontroller');
-                break;
-        }
-
-        // leave if we aren't in an approved controller
-        if ($Pages != 'all' && !InArrayI($Controller, $ShowOnController)) {
-            $Result = TRUE;
-        }
-        return $Result;
+    /**
+     * Create a latestpostlist mini controller.
+     * 
+     * Creates a method called "LatestPostList" on the PluginController and
+     * dispatch, making it act like a controller.
+     * 
+     * @param PluginController $sender The sending object.
+     */
+    public function pluginController_latestPostList_create($sender) {
+        $this->Dispatch($sender, $sender->RequestArgs);
     }
 
-    //This is a common hook that fires for all controllers on the Render method
-    public function Base_Render_Before($Sender) {
-        // Never show on admin pages
-        if ($Sender->MasterView == 'admin' || $this->DisallowedPage($Sender)) {
-            return;
-        }
-
-        // bring in the module into this controller
-        $Module = new LatestPostListModule($Sender);
-        $Sender->AddModule($Module);
-
-        // Only add the JS file and definition if needed
-        $Frequency = C('Plugins.LatestPostList.Frequency', 120);
-        if ($Frequency > 0) {
-            $Sender->AddJsFile($this->GetResource('js/latestpostlist.js', FALSE, FALSE));
-            $Sender->AddDefinition('LatestPostListFrequency', $Frequency);
-            $Sender->AddDefinition('LatestPostListLastDate', $Module->GetDate());
-            $Sender->AddDefinition('LatestPostListEffects', C('Plugins.LatestPostList.Effects', 'none'));
-        }
+    /**
+     * Get the latest list of discussions as a JSON object.
+     * 
+     * This gets the latest post date, the latest post list and returns it as
+     * json object. This is used to make the AJAX refresh intelligent
+     * 
+     * @param PluginController $sender The sending object.
+     */
+    public function controller_getNewList($sender) {
+        $lplModule = new LatestPostListModule($sender);
+        $data = array('date' => $lplModule->GetDate(), 'list' => $lplModule->PostList());
+        echo json_encode($data);
     }
 
-    // Used to make the ajax refresh intelligent
-    // This gets the latest post date, the latest post list and returns it as json object
-    public function Controller_GetNewList($Sender) {
-        $LPL = new LatestPostListModule($Sender);
-        $Data = array('date' => $LPL->GetDate(), 'list' => $LPL->PostList());
-        echo json_encode($Data);
-    }
+    /**
+     * Show settings if no other method was specified.
+     * 
+     * @param PluginController $sender The base object.
+     */
+    public function controller_index($sender) {
+        $sender->permission('Garden.Settings.Manage');
+        $sender->title('Latest Post List Plugin');
+        $sender->addSideMenu('plugin/latestpostlist');
 
-    // Treat our mini-controller as a settings page (plugin/latestpostlist)
-    public function Controller_Index($Sender) {
-        // Admins only
-        $Sender->Permission('Garden.Settings.Manage');
+        $sender->Form = new Gdn_Form();
 
         // Set data used by the view
-        $Sender->SetData('PluginDescription', $this->GetPluginKey('Description'));
+        $sender->setData('PluginDescription', $this->getPluginKey('Description'));
 
         $Validation = new Gdn_Validation();
         $ConfigurationModel = new Gdn_ConfigurationModel($Validation);
-        $ConfigurationModel->SetField(array(
-            'Plugins.LatestPostList.Pages' => 'all',
-            'Plugins.LatestPostList.Frequency' => 120,
-            'Plugins.LatestPostList.Count' => 5,
-            'Plugins.LatestPostList.Link' => 'discussions',
-            'Plugins.LatestPostList.Effects' => 'none',
+        $ConfigurationModel->setField(array(
+            'LatestPostList.Pages' => 'all',
+            'LatestPostList.Frequency' => 120,
+            'LatestPostList.Count' => 5,
+            'LatestPostList.Link' => 'discussions',
+            'LatestPostList.Effects' => 'none',
         ));
 
         // Set the model on the form.
-        $Sender->Form->SetModel($ConfigurationModel);
+        $sender->Form->setModel($ConfigurationModel);
 
         // If seeing the form for the first time...
-        if ($Sender->Form->AuthenticatedPostBack() === FALSE) {
+        if ($sender->Form->authenticatedPostBack() === false) {
             // Apply the config settings to the form.
-            $Sender->Form->SetData($ConfigurationModel->Data);
+            $sender->Form->setData($ConfigurationModel->Data);
         } else {
-            $ConfigurationModel->Validation->ApplyRules(array(
-                        array('Name' => 'Plugins.LatestPostList.Pages', 'Validation' => 'Required'),
-                        array('Name' => 'Plugins.LatestPostList.Frequency', 'Validation' => array('Required', 'Integer') ),
-                        array('Name' => 'Plugins.LatestPostList.Count', 'Validation' => array('Required', 'Integer')),
-                        array('Name' => 'Plugins.LatestPostList.Effects', 'Validation' => 'Required') ) );
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Pages', 'Required');
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Frequency', 'Required');
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Frequency', 'Integer');
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Count', 'Required');
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Count', 'Integer');
+            $ConfigurationModel->Validation->applyRule('LatestPostList.Effects', 'Required');
 
-            $Saved = $Sender->Form->Save();
-            if ($Saved) {
-                $Sender->InformMessage('<span class="InformSprite Sliders"></span>' . T('Your changes have been saved.'), 'HasSprite');
+            $saved = $sender->Form->save();
+            if ($saved) {
+                $sender->informMessage('<span class="InformSprite Sliders"></span>' . T('Your changes have been saved.'), 'HasSprite');
             }
         }
 
         // Add the javascript needed for a live preview
-        $Sender->AddJsFile($this->GetResource('js/preview.js', FALSE, FALSE));
+        $sender->addJsFile($this->getResource('js/preview.js', false, false));
         // Render the settings view
-        $Sender->Render($this->GetView('settings.php'));
+        $sender->render($this->getView('settings.php'));
+    }
+    
+    /**
+     * Based on configuration, is the sending controller disallowed?
+     * 
+     * @param Gdn_Controller $sender The sending controller.
+     * @return boolean Whether the page is disallowed.
+     */
+    private function disallowedPage($sender) {
+        $result = false;
+        $pages = c('LatestPostList.Pages', 'both');
+        $controller = $sender->ControllerName;
+        switch ($pages) {
+            case 'announcements':
+                $showOnController = array('profilecontroller', 'activitycontroller');
+                break;
+            case 'discussions':
+                $showOnController = array('discussioncontroller', 'discussionscontroller', 'categoriescontroller', 'draftscontroller');
+                break;
+            case 'both':
+            default:
+                $showOnController = array(
+                    'discussioncontroller',
+                    'categoriescontroller',
+                    'discussionscontroller',
+                    'draftscontroller',
+                    'profilecontroller',
+                    'activitycontroller');
+                break;
+        }
+
+        // leave if we aren't in an approved controller
+        if ($pages != 'all' && !InArrayI($controller, $showOnController)) {
+            $result = true;
+        }
+        return $result;
     }
 
-    // Add a link to the dashboard menu
-    public function Base_GetAppSettingsMenuItems_Handler($Sender) {
-        $Menu = &$Sender->EventArguments['SideMenu'];
-        $Menu->AddLink('Add-ons', 'Latest Post List', 'plugin/latestpostlist', 'Garden.Settings.Manage');
+    /**
+     * Adds the module to the panel on every allowed non-admin page.
+     * 
+     * @param Gdn_Controller $sender The base controller.
+     */
+    public function base_render_before($sender) {
+        // Never show on admin pages
+        if ($sender->MasterView == 'admin' || $this->disallowedPage($sender)) {
+            return;
+        }
+
+        // bring in the module into this controller
+        $module = new LatestPostListModule($sender);
+        $sender->addModule($module);
+
+        // Only add the JS file and definition if needed
+        $frequency = c('LatestPostList.Frequency', 120);
+        if ($frequency > 0) {
+            $sender->addJsFile($this->GetResource('js/latestpostlist.js', false, false));
+            $sender->addDefinition('LatestPostListFrequency', $frequency);
+            $sender->addDefinition('LatestPostListLastDate', $module->getDate());
+            $sender->addDefinition('LatestPostListEffects', c('LatestPostList.Effects', 'none'));
+        }
     }
 
-    // fired on install (once)
-    public function Setup() {
-        // Set up the plugin's default values
-        SaveToConfig('Plugins.LatestPostList.Frequency', 120);
-        SaveToConfig('Plugins.LatestPostList.Effects', 'none');
-        SaveToConfig('Plugins.LatestPostList.Count', 5);
-        SaveToConfig('Plugins.LatestPostList.Pages', 'all');
-        SaveToConfig('Plugins.LatestPostList.Link', 'discussions');
+    /**
+     * Add a link to the dashboard menu to access the settings.
+     * 
+     * @param Gdn_Controller $sender The controller that wants menu items.
+     */
+    public function base_getAppSettingsMenuItems_handler($sender) {
+        $menu = &$sender->EventArguments['SideMenu'];
+        $menu->addLink('Add-ons', 'Latest Post List', 'plugin/latestpostlist', 'Garden.Settings.Manage');
     }
 
-    // fired on disable (removal)
-    public function OnDisable() {
-        RemoveFromConfig('Plugins.LatestPostList.Frequency');
-        RemoveFromConfig('Plugins.LatestPostList.Effects');
-        RemoveFromConfig('Plugins.LatestPostList.Count');
-        RemoveFromConfig('Plugins.LatestPostList.Pages');
-        RemoveFromConfig('Plugins.LatestPostList.Link');
+    /**
+     * Set some default values to the config.
+     */
+    public function setup() {
+        $this->updateConfig('Frequency', 120);
+        $this->updateConfig('Effects', 'none');
+        $this->updateConfig('Count', 5);
+        $this->updateConfig('Pages', 'all');
+        $this->updateConfig('Link', 'discussions');
     }
-
+    
+    /**
+     * Update the config settings on update.
+     */
+    public function structure() {
+        $this->setup();
+    }
+    
+    /**
+     * Removes old configs and updates to new style.
+     * 
+     * @param string $name Sub-config to update.
+     * @param mixed $default Default to use if previous setting not found.
+     */
+    private function updateConfig($name, $default) {
+        if (c('Plugins.LatestPostList.' . $name) !== false) {
+            $default = c('Plugins.LatestPostList.' . $name);
+            removeFromConfig('Plugins.LatestPostList.' . $name, true);
+        }
+        touchConfig('LatestPostList.' . $name, $default);
+    }
 }
