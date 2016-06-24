@@ -1,8 +1,8 @@
-/* Copyright 2013-2015 Zachary Doll */
+/* Copyright 2013-2016 Zachary Doll */
 $(function () {
-    function PreviewPostUpdate(Effect) {
+    function previewPostUpdate(effect) {
         var newListItems = $('#LPLNewItems');
-        switch (Effect) {
+        switch (effect) {
             case 'Rolling Hide':
                 $("#LPLPreview li").each(function (index) {
                     $(this).delay(200 * index).hide('slow', function () {
@@ -52,7 +52,7 @@ $(function () {
         }
     }
 
-    $('#Form_Plugins-dot-LatestPostList-dot-Effects').change(function () {
-        PreviewPostUpdate($(this).find(':selected').text());
+    $('#Form_LatestPostList-dot-Effects').change(function () {
+        previewPostUpdate($(this).find(':selected').text());
     });
 });

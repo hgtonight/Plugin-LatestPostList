@@ -1,11 +1,11 @@
-/* Copyright 2013-2015 Zachary Doll */
+/* Copyright 2013-2016 Zachary Doll */
 $(function () {
     // Set variables from configs
-    var Effects   = gdn.definition('LatestPostListEffects');
-    var Frequency = gdn.definition('LatestPostListFrequency');
-    var LastDate  = gdn.definition('LatestPostListLastDate');
+    var efx = gdn.definition('LatestPostListEffects');
+    var frequency = gdn.definition('LatestPostListFrequency');
+    var lastDate = gdn.definition('LatestPostListLastDate');
 
-    function GetLatestPosts() {
+    function getLatestPosts() {
         var url = gdn.url('/plugin/latestpostlist/getnewlist');
 
         $.ajax({
@@ -14,21 +14,20 @@ $(function () {
             type: "GET",
             data: null,
             dataType: "json",
-            success: function (Data) {
-                if (Data.date !== LastDate) {
-                    UpdateList(Data);
+            success: function (data) {
+                if (data.date !== lastDate) {
+                    updateList(data);
                 }
-                setTimeout(GetLatestPosts, Frequency * 1000);
+                setTimeout(getLatestPosts, frequency * 1000);
             }
         });
     }
 
-    function UpdateList(Data) {
-        LastDate = Data.date;
-        console.log(Effects);
-        switch (Effects) {
+    function updateList(data) {
+        lastDate = data.date;
+        switch (efx) {
             case '1':
-                var newListItems = $('<ul id="LPLNUl" />').html(Data.list).contents();
+                var newListItems = $('<ul id="LPLNUl" />').html(data.list).contents();
                 $("#LPLUl li").each(function (index) {
                     $(this).delay(200 * index).hide('slow', function () {
                         $(this).html(newListItems.filter(':nth-child(' + (index + 1) + ')').html());
@@ -38,12 +37,12 @@ $(function () {
                 break;
             case '2':
                 $("#LPLUl").fadeOut('slow', function () {
-                    $(this).html(Data.list);
+                    $(this).html(data.list);
                     $("#LPLUl").fadeIn('slow');
                 });
                 break;
             case '3':
-                var newListItems = $('<ul id="LPLNUl" />').html(Data.list).contents();
+                var newListItems = $('<ul id="LPLNUl" />').html(data.list).contents();
                 $("#LPLUl li").each(function (index) {
                     $(this).delay(200 * index).fadeOut('slow', function () {
                         $(this).html(newListItems.filter(':nth-child(' + (index + 1) + ')').html());
@@ -52,7 +51,7 @@ $(function () {
                 });
                 break;
             case '4':
-                var newListItems = $('<ul id="LPLNUl" />').html(Data.list).contents();
+                var newListItems = $('<ul id="LPLNUl" />').html(data.list).contents();
                 $("#LPLUl li").each(function (index) {
                     $(this).delay(200 * index).slideToggle('slow', function () {
                         $(this).html(newListItems.filter(':nth-child(' + (index + 1) + ')').html());
@@ -61,7 +60,7 @@ $(function () {
                 });
                 break;
             case '5':
-                var newListItems = $('<ul id="LPLNUl" />').html(Data.list).contents();
+                var newListItems = $('<ul id="LPLNUl" />').html(data.list).contents();
                 $("#LPLUl li").each(function (index) {
                     var oldHeight = $(this).height();
                     $(this).delay(200 * index).animate({opacity: 'toggle', width: 'toggle', height: oldHeight}, 'slow', function () {
@@ -75,12 +74,12 @@ $(function () {
                 break;
             default:
             case 'none':
-                $("#LPLUl").html(Data.list);
+                $("#LPLUl").html(data.list);
                 break;
         }
     }
 
-    if (Frequency > 0) {
-        setTimeout(GetLatestPosts, Frequency * 1000);
+    if (frequency > 0) {
+        setTimeout(getLatestPosts, frequency * 1000);
     }
 });
